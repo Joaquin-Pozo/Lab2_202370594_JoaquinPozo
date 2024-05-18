@@ -27,4 +27,5 @@ section(ST10, ST11, 7, 200, S10),
 line(0, "Línea 0", "UIC 60 ASCE", [ ], L0),
 line(1, "Línea 1", "100 R.E.", [S0, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10], L1),
 lineLength(L0, LargoLinea0, DistanciaLinea0, CostoLinea0),
-lineLength(L1, LargoLinea1, DistanciaLinea1, CostoLinea1).
+lineLength(L1, LargoLinea1, DistanciaLinea1, CostoLinea1),
+lineSectionLength(L1, "Estación Central", "La Moneda", DISTANCIA, COSTO).
