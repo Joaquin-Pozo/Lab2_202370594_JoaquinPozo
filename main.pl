@@ -51,28 +51,31 @@ lineLengthRec([Section | Sections], Length, Distance, Cost) :-
 % Req. 6: TDA line - otras funciones
 % Meta Primaria: lineSectionLength/5
 % Meta Secundaria: line/5, lineSectionLengthRec/6
-lineSectionLength(Line, Station1Name, Station2Name, Distance, Cost) :-
+lineSectionLength(Line, Station1Name, Station2Name, Path, Distance, Cost) :-
     line(_, _, _, Sections, Line),
-    lineSectionLengthRec(Sections, Station1Name, Station2Name, Distance, Cost, 0).
+    lineSectionLengthRec(Sections, Station1Name, Station2Name, Path, Distance, Cost, 0).
 
-lineSectionLengthRec([], _, _, 0, 0, _).
-lineSectionLengthRec([Section | Sections], Station1Name, Station2Name, Distance, Cost, Flag) :-
+lineSectionLengthRec([], _, _, [], 0, 0, _).
+lineSectionLengthRec([Section | Sections], Station1Name, Station2Name, Path, Distance, Cost, Flag) :-
     section(GetStation1, GetStation2, GetDistance, GetCost, Section),
     station(_, GetStation1Name, _, _, GetStation1),
     station(_, GetStation2Name, _, _, GetStation2),
     (   (GetStation1Name = Station1Name, GetStation2Name = Station2Name) ->
-            (Distance is GetDistance, Cost is GetCost)
+            (Distance is GetDistance, Cost is GetCost, Path = [Section])
     ;   (GetStation1Name = Station1Name) ->
-            lineSectionLengthRec(Sections, GetStation2Name, Station2Name, DistanceAux, CostAux, 1),
+            lineSectionLengthRec(Sections, GetStation2Name, Station2Name, PathAux, DistanceAux, CostAux, 1),
             Distance is DistanceAux + GetDistance,
-            Cost is CostAux + GetCost
+            Cost is CostAux + GetCost,
+        	Path = [Section | PathAux]
     ;   (GetStation2Name = Station2Name) ->
-            lineSectionLengthRec(Sections, GetStation1Name, Station2Name, DistanceAux, CostAux, 0),
+            lineSectionLengthRec(Sections, GetStation1Name, Station2Name, PathAux, DistanceAux, CostAux, 0),
             Distance is DistanceAux + GetDistance,
-            Cost is CostAux + GetCost
+            Cost is CostAux + GetCost,
+        	Path = [Section | PathAux]
     ;   (Flag = 1 ->
-            lineSectionLengthRec(Sections, Station1Name, Station2Name, DistanceAux, CostAux, Flag),
+            lineSectionLengthRec(Sections, Station1Name, Station2Name, PathAux, DistanceAux, CostAux, Flag),
             Distance is DistanceAux + GetDistance,
-            Cost is CostAux + GetCost)
-    ;   lineSectionLengthRec(Sections, Station1Name, Station2Name, Distance, Cost, Flag)
+            Cost is CostAux + GetCost,
+            Path = [Section | PathAux])
+    ;   lineSectionLengthRec(Sections, Station1Name, Station2Name, Path, Distance, Cost, Flag)
     ).
