@@ -49,13 +49,25 @@ lineLengthRec([Section | Sections], Length, Distance, Cost) :-
     Length is GetLengthAux + 1.
 
 % Req. 6: TDA line - otras funciones
-% Meta Primaria: lineSectionLength/5
-% Meta Secundaria: line/5, lineSectionLengthRec/6
+% Meta Primaria: lineSectionLength/6
+% Meta Secundaria: line/5, lineSectionLengthRec/7
 lineSectionLength(Line, Station1Name, Station2Name, Path, Distance, Cost) :-
     line(_, _, _, Sections, Line),
     lineSectionLengthRec(Sections, Station1Name, Station2Name, Path, Distance, Cost, 0).
 
+% TDA line - Otras funciones: caso base para función recursiva
+% Meta Primaria: lineSectionLengthRec/7
+% Meta Secundaria: N/A
 lineSectionLengthRec([], _, _, [], 0, 0, _).
+
+% TDA line - Otras funciones: caso recursivo para función recursiva
+% Meta Primaria: lineSectionLengthRec/7
+/* Meta Secundaria: section/5, station/5, station/5,(GetStation1Name = Station1Name, GetStation2Name = Station2Name) ->
+					(Distance is GetDistance, Cost is GetCost, Path = [Section]);(GetStation1Name = Station1Name) ->lineSectionLengthRec/7,
+					Distance is DistanceAux + GetDistance,Cost is CostAux + GetCost,Path = [Section | PathAux];(GetStation2Name = Station2Name) ->
+					lineSectionLengthRec(Sections, GetStation1Name, Station2Name, PathAux, DistanceAux, CostAux, 0),Distance is DistanceAux + GetDistance,
+					Cost is CostAux + GetCost,Path = [Section | PathAux];Flag = 1 ->lineSectionLengthRec/7,Distance is DistanceAux + GetDistance,
+					Cost is CostAux + GetCost,Path = [Section | PathAux]);lineSectionLengthRec/7)*/
 lineSectionLengthRec([Section | Sections], Station1Name, Station2Name, Path, Distance, Cost, Flag) :-
     section(GetStation1, GetStation2, GetDistance, GetCost, Section),
     station(_, GetStation1Name, _, _, GetStation1),
@@ -79,3 +91,11 @@ lineSectionLengthRec([Section | Sections], Station1Name, Station2Name, Path, Dis
             Path = [Section | PathAux])
     ;   lineSectionLengthRec(Sections, Station1Name, Station2Name, Path, Distance, Cost, Flag)
     ).
+
+
+% Req. 7 TDA line - modificador: Predicado que permite añadir tramos a una línea
+% Meta Primaria: lineAddSection/3
+% Meta Secundaria: line/5, line/5
+lineAddSection(Line, Section, LineOut) :-
+    line(GetLineId, GetLineName, GetLineRailType, GetLineSections, Line),
+    line(GetLineId, GetLineName, GetLineRailType, [Section | GetLineSections], LineOut).
