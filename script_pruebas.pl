@@ -35,4 +35,12 @@ lineAddSection(L0, S0, L0_1),
 lineAddSection(L0_1, S1, L0_2),
 lineAddSection(L0_2, S2, L0_3),
 lineAddSection(L1, S11, L1_1),
-isLine(L1).
+isLine(L1),
+isLine(L0_3),
+pcar(0, 90, "NS-74", "ct", PC0),
+pcar(1, 100, "NS-74", "tr", PC1),
+pcar(2, 150, "NS-74", "tr", PC2),
+pcar(3, 90, "NS-74", "ct", PC3),
+pcar(4, 100, "AS-2014", "ct", PC4),
+pcar(5, 100, "AS-2014", "ct", PC5),
+pcar(6, 100, "AS-2016", "ct", PC6).

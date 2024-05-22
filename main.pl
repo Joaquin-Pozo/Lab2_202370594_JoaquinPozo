@@ -1,4 +1,4 @@
-% Req. 2: TDA station - constructor
+% Req. 2 TDA station - constructor
 % Meta Primaria: station/5
 % Meta Secundaria: integer(Id),string(Name),string(Type),(Type == "r"; Type == "m"; Type == "c"; Type == "t"),integer(StopTime),StopTime >= 0,!.
 station(Id, Name, Type, StopTime, [Id, Name, Type, StopTime]) :-
@@ -10,7 +10,7 @@ station(Id, Name, Type, StopTime, [Id, Name, Type, StopTime]) :-
     StopTime >= 0,
     !.
 
-% Req. 3: TDA section - constructor
+% Req. 3 TDA section - constructor
 % Meta Primaria: section/5
 % Meta Secundaria: (float(Distance); integer(Distance)),Distance > 0,(float(Cost); integer(Cost)),Cost >= 0,!
 section(Point1, Point2, Distance, Cost, [Point1, Point2, Distance, Cost]) :-
@@ -20,7 +20,7 @@ section(Point1, Point2, Distance, Cost, [Point1, Point2, Distance, Cost]) :-
     Cost >= 0,
     !.
 
-% Req. 4: TDA line - constructor
+% Req. 4 TDA line - constructor
 % Meta Primaria: line/5
 % Meta Secundaria: integer(Id),string(Name),string(RailType),is_list(Sections)
 line(Id, Name, RailType, Sections, [Id, Name, RailType, Sections]) :-
@@ -28,7 +28,7 @@ line(Id, Name, RailType, Sections, [Id, Name, RailType, Sections]) :-
     string(Name),
     string(RailType),
     is_list(Sections).
-% Req. 5: TDA line - Otros predicados
+% Req. 5 TDA line - Otros predicados
 % Meta Primaria: lineLength/4
 % Meta Secundaria: line/5, lineLengthRec/4
 lineLength(Line, Length, Distance, Cost) :-
@@ -48,7 +48,7 @@ lineLengthRec([Section | Sections], Length, Distance, Cost) :-
     Cost is GetCostAux + GetCost,
     Length is GetLengthAux + 1.
 
-% Req. 6: TDA line - otras funciones
+% Req. 6 TDA line - otras funciones
 % Meta Primaria: lineSectionLength/6
 % Meta Secundaria: line/5, lineSectionLengthRec/7
 lineSectionLength(Line, Station1Name, Station2Name, Path, Distance, Cost) :-
@@ -136,3 +136,13 @@ verifySections([FirstSection, SecondSection | RestSections]) :-
     section(_, Station, _, _, FirstSection),
     section(Station, _, _, _, SecondSection),
     verifySections([SecondSection | RestSections]).
+
+% Req. 9 TDA pcar - Constructor. Permite crear los carros de pasajeros que conforman un convoy. Los carros pueden ser de tipo terminal (tr) o central (ct).
+% MP
+% MS
+pcar(Id, Capacity, Model, Type, [Id, Capacity, Model, Type]) :-
+    integer(Id),
+    integer(Capacity),
+    Capacity >= 0,
+    string(Model),
+    string(Type).
