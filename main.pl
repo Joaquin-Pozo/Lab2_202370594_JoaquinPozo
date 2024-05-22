@@ -107,34 +107,32 @@ lineAddSection(Line, Section, LineOut) :-
 % Meta Secundaria:
 isLine(Line) :-
     line(_, _, _, GetLineSections, Line),
-    verifyIdName(GetLineSections, [], []).
+    (GetLineSections = [] ->  false;  
+    (verifyIdName(GetLineSections, [], []), verifySections(GetLineSections))).
 
 % Caso base: no hay más secciones que verificar
 verifyIdName([], _, _).
 
 % Caso recursivo: verifica cada sección en la lista de secciones
 verifyIdName([FirstSection | RestSections], IdList, NameList) :-
-    section(GetPoint1, GetPoint2, _, _, FirstSection),
+    section(GetPoint1, _, _, _, FirstSection),
     station(GetIdPoint1, GetNamePoint1, _, _, GetPoint1),
-    station(GetIdPoint2, GetNamePoint2, _, _, GetPoint2),
-    checkStationIdName(GetIdPoint1, GetNamePoint1, IdList, NameList, UpdatedIdList1, UpdatedNameList1),
-    checkStationIdName(GetIdPoint2, GetNamePoint2, UpdatedIdList1, UpdatedNameList1, UpdatedIdList2, UpdatedNameList2),
-    verifyIdName(RestSections, UpdatedIdList2, UpdatedNameList2).
+    checkStationIdName(GetIdPoint1, GetNamePoint1, IdList, NameList, UpdatedIdList, UpdatedNameList),
+    verifyIdName(RestSections, UpdatedIdList, UpdatedNameList).
 
-% Predicado auxiliar que verifica y actualiza la lista de IDs y nombres.
+% TDA line: Verifica y actualiza la lista de IDs y nombres
 checkStationIdName(Id, Name, IdList, NameList, UpdatedIdList, UpdatedNameList) :-
-    % Verifica si el ID y el nombre ya están en las listas respectivas.
-    (member(Id, IdList) ->
-        (member(Name, NameList) ->
-            UpdatedIdList = IdList,
-            UpdatedNameList = NameList
-        ; % Si el ID está pero el nombre no, hay un conflicto
-            fail)
-    ; % Si el ID no está, verificar el nombre
-        (member(Name, NameList) -> % Si el nombre está pero el ID no, hay un conflicto
-            fail
-        ; % Si ninguno está, añadir ambos a las listas respectivas
-            UpdatedIdList = [Id | IdList],
-            UpdatedNameList = [Name | NameList]
-        )
-    ).
+    % Verifica si el ID y el nombre ya estan en las listas
+    (	not(member(Id, IdList)) ->
+    		UpdatedIdList = [Id | IdList]
+    	;	fail)
+    ;	(not(member(Name, NameList)) ->
+        	UpdatedNameList = [Name | NameList]
+     	;   fail). 
+% TDA line: Verifica si de una estación se pueda ir a todas las demás estaciones
+verifySections([]).
+verifySections([_]). % Una sola sección es válida por defecto
+verifySections([FirstSection, SecondSection | RestSections]) :-
+    section(_, Station, _, _, FirstSection),
+    section(Station, _, _, _, SecondSection),
+    verifySections([SecondSection | RestSections]).
