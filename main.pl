@@ -92,10 +92,49 @@ lineSectionLengthRec([Section | Sections], Station1Name, Station2Name, Path, Dis
     ;   lineSectionLengthRec(Sections, Station1Name, Station2Name, Path, Distance, Cost, Flag)
     ).
 
-
 % Req. 7 TDA line - modificador: Predicado que permite añadir tramos a una línea
 % Meta Primaria: lineAddSection/3
 % Meta Secundaria: line/5, line/5
 lineAddSection(Line, Section, LineOut) :-
     line(GetLineId, GetLineName, GetLineRailType, GetLineSections, Line),
-    line(GetLineId, GetLineName, GetLineRailType, [Section | GetLineSections], LineOut).
+    not(member(Section, GetLineSections)),
+    append(GetLineSections, [Section], LineSectionsOut),
+    line(GetLineId, GetLineName, GetLineRailType, LineSectionsOut, LineOut).
+
+% Req. 8 TDA Línea - pertenencia. Predicado que permite determinar si un elemento cumple con las 
+% restricciones señaladas en apartados anteriores en relación a las estaciones y tramos para poder conformar una línea.
+% Meta Primaria:
+% Meta Secundaria:
+isLine(Line) :-
+    line(_, _, _, GetLineSections, Line),
+    verifyIdName(GetLineSections, [], []).
+
+% Caso base: no hay más secciones que verificar
+verifyIdName([], _, _).
+
+% Caso recursivo: verifica cada sección en la lista de secciones
+verifyIdName([FirstSection | RestSections], IdList, NameList) :-
+    section(GetPoint1, GetPoint2, _, _, FirstSection),
+    station(GetIdPoint1, GetNamePoint1, _, _, GetPoint1),
+    station(GetIdPoint2, GetNamePoint2, _, _, GetPoint2),
+    checkStationIdName(GetIdPoint1, GetNamePoint1, IdList, NameList, UpdatedIdList1, UpdatedNameList1),
+    checkStationIdName(GetIdPoint2, GetNamePoint2, UpdatedIdList1, UpdatedNameList1, UpdatedIdList2, UpdatedNameList2),
+    verifyIdName(RestSections, UpdatedIdList2, UpdatedNameList2).
+
+% Predicado auxiliar que verifica y actualiza la lista de IDs y nombres.
+checkStationIdName(Id, Name, IdList, NameList, UpdatedIdList, UpdatedNameList) :-
+    % Verifica si el ID y el nombre ya están en las listas respectivas.
+    (member(Id, IdList) ->
+        (member(Name, NameList) ->
+            UpdatedIdList = IdList,
+            UpdatedNameList = NameList
+        ; % Si el ID está pero el nombre no, hay un conflicto
+            fail)
+    ; % Si el ID no está, verificar el nombre
+        (member(Name, NameList) -> % Si el nombre está pero el ID no, hay un conflicto
+            fail
+        ; % Si ninguno está, añadir ambos a las listas respectivas
+            UpdatedIdList = [Id | IdList],
+            UpdatedNameList = [Name | NameList]
+        )
+    ).
