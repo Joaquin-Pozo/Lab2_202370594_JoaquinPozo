@@ -139,8 +139,8 @@ verifySections([FirstSection, SecondSection | RestSections]) :-
     verifySections([SecondSection | RestSections]).
 
 % Req. 9 TDA pcar - Constructor. Permite crear los carros de pasajeros que conforman un convoy. Los carros pueden ser de tipo terminal (tr) o central (ct).
-% MP
-% MS
+% Meta Primaria: pcar/5
+% Meta Secundaria: integer(Id),integer(Capacity),Capacity >= 0,string(Model),string(Type).
 pcar(Id, Capacity, Model, Type, [Id, Capacity, Model, Type]) :-
     integer(Id),
     integer(Capacity),
@@ -149,8 +149,8 @@ pcar(Id, Capacity, Model, Type, [Id, Capacity, Model, Type]) :-
     string(Type).
 
 % Req. 10 TDA train - Constructor. Predicado que permite crear un tren o convoy.
-% MP:
-% MS: 
+% Meta Primaria: train/6
+% Meta Secundaria:  integer(Id),string(Maker),string(RailType),integer(Speed),Speed >= 0,is_list(Pcars),(Pcars = [] ->  true; checkTrainStructure(Pcars)).
 train(Id, Maker, RailType, Speed, Pcars, [Id, Maker, RailType, Speed, Pcars]) :-
     integer(Id),
     string(Maker),
@@ -158,16 +158,32 @@ train(Id, Maker, RailType, Speed, Pcars, [Id, Maker, RailType, Speed, Pcars]) :-
     integer(Speed),
     Speed >= 0,
     is_list(Pcars),
-    (Pcars = [] ->  true; checkTrainStructure(Pcars)). %preguntar si retorna #t o #f para [] de pcars
+    ((Pcars = []; Pcars = [_]) ->  true; checkTrainStructure(Pcars)).
 
+% TDA train: Verifica si el primer y ultimo carro son terminales, y si tienen modelos compatibles
 checkTrainStructure([FirstPcar | RestPcars]) :-
     pcar(_, _, ModelPcar, TypePcar, FirstPcar),
     checkMiddlePcars(RestPcars, LastPcar, ModelPcar),
     pcar(_, _, ModelPcar, TypePcar, LastPcar),
     TypePcar = "tr".
-
+% TDA train: Verifica si los demas carros son centrales, y si tienen modelos compatibles
 checkMiddlePcars([LastPcar], LastPcar, _).
 checkMiddlePcars([FirstPcar | RestPcars], LastPcar, ModelPcar) :-
     pcar(_, _, ModelPcar, Type, FirstPcar),
     Type = "ct",
     checkMiddlePcars(RestPcars, LastPcar, ModelPcar).
+
+% Req. 11 TDA train - Modificador. Función que permite añadir carros a un tren en una posición dada.
+% Meta Primaria:
+% Meta Secundaria:
+trainAddCar(Train, Pcar, Position, TrainOut) :-
+    train(Id, Maker, RailType, Speed, Pcars, Train),
+    addCarInPosition(Pcars, Pcar, Position, PcarsOut),
+    train(Id, Maker, RailType, Speed, PcarsOut, TrainOut).
+
+% TDA train: Añade un carro a una lista de carros en una posición dada
+addCarInPosition(Pcars, Pcar, 0, [Pcar | Pcars]) :- !.
+addCarInPosition([FirstPcar | RestPcars], Pcar, Position, [FirstPcar | NewRestPcars]) :-
+    Position > 0,
+    NewPosition is Position - 1,
+    addCarInPosition(RestPcars, Pcar, NewPosition, NewRestPcars).

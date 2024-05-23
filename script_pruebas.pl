@@ -76,7 +76,6 @@ lineAddSection(L0_2, S2, L0_3),
 lineAddSection(L1, S11, L1_1),
 isLine(L1),
 isLine(L0_3),
-
 pcar(0, 90, "NS-74", "ct", PC0),
 pcar(1, 100, "NS-74", "tr", PC1),
 pcar(2, 150, "NS-74", "tr", PC2),
@@ -85,4 +84,9 @@ pcar(4, 100, "AS-2014", "ct", PC4),
 pcar(5, 100, "AS-2014", "ct", PC5),
 pcar(6, 100, "AS-2016", "ct", PC6),
 train(0, "CAF", "UIC 60 ASCE", 60, [ ], T0),
-train(1, "CAF", "UIC 60 ASCE", 70, [PC1, PC0, PC3, PC2], T1).
+train(1, "CAF", "UIC 60 ASCE", 70, [PC1, PC0, PC3, PC2], T1),
+%el tren resultante T5 debería ser equivalente a T1
+trainAddCar(T0, PC1, 0, T2),
+trainAddCar(T2, PC2, 1, T3),
+trainAddCar(T3, PC0, 1, T4),
+trainAddCar(T4, PC3, 2, T5).
