@@ -108,7 +108,8 @@ lineAddSection(Line, Section, LineOut) :-
 isLine(Line) :-
     line(_, _, _, GetLineSections, Line),
     (GetLineSections = [] ->  false;  
-    (verifyIdName(GetLineSections, [], []), verifySections(GetLineSections))).
+    (verifyIdName(GetLineSections, [], []), verifySections(GetLineSections))),
+    !.
 
 % Caso base: no hay más secciones que verificar
 verifyIdName([], _, _).
@@ -146,3 +147,27 @@ pcar(Id, Capacity, Model, Type, [Id, Capacity, Model, Type]) :-
     Capacity >= 0,
     string(Model),
     string(Type).
+
+% Req. 10 TDA train - Constructor. Predicado que permite crear un tren o convoy.
+% MP:
+% MS: 
+train(Id, Maker, RailType, Speed, Pcars, [Id, Maker, RailType, Speed, Pcars]) :-
+    integer(Id),
+    string(Maker),
+    string(RailType),
+    integer(Speed),
+    Speed >= 0,
+    is_list(Pcars),
+    (Pcars = [] ->  true; checkTrainStructure(Pcars)). %preguntar si retorna #t o #f para [] de pcars
+
+checkTrainStructure([FirstPcar | RestPcars]) :-
+    pcar(_, _, ModelPcar, TypePcar, FirstPcar),
+    checkMiddlePcars(RestPcars, LastPcar, ModelPcar),
+    pcar(_, _, ModelPcar, TypePcar, LastPcar),
+    TypePcar = "tr".
+
+checkMiddlePcars([LastPcar], LastPcar, _).
+checkMiddlePcars([FirstPcar | RestPcars], LastPcar, ModelPcar) :-
+    pcar(_, _, ModelPcar, Type, FirstPcar),
+    Type = "ct",
+    checkMiddlePcars(RestPcars, LastPcar, ModelPcar).
