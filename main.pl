@@ -189,6 +189,8 @@ addCarInPosition([FirstPcar | RestPcars], Pcar, Position, [FirstPcar | NewRestPc
     addCarInPosition(RestPcars, Pcar, NewPosition, NewRestPcars).
 
 % Req. 12 TDA train - Modificador. Predicado que permite eliminar un carro desde el convoy.
+% Meta Primaria:
+% Meta Secundaria:
 trainRemoveCar(Train, Position, TrainOut) :-
     train(Id, Maker, RailType, Speed, Pcars, Train),
     removeCarInPosition(Pcars, Position, PcarsOut),
@@ -200,3 +202,16 @@ removeCarInPosition([FirstPcar | RestPcars], Position, [FirstPcar | NewRestPcars
     Position > 0,
     NewPosition is Position -1,
     removeCarInPosition(RestPcars, NewPosition, NewRestPcars).
+    
+% Req. 13 TDA train - Pertenencia. Predicado que permite determinar si un elemento es un tren válido
+% Meta Primaria
+% Meta Secundaria
+isTrain(Train) :-
+    train(Id, Maker, RailType, Speed, Pcars, Train),
+    integer(Id),
+    string(Maker),
+    string(RailType),
+    integer(Speed),
+    Speed >= 0,
+    is_list(Pcars),
+    checkTrainStructure(Pcars).

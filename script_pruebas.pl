@@ -91,4 +91,6 @@ trainAddCar(T2, PC2, 1, T3),
 trainAddCar(T3, PC0, 1, T4),
 trainAddCar(T4, PC3, 2, T5),
 trainRemoveCar(T5, 2, T52),
-trainRemoveCar(T52, 1, T53).
+trainRemoveCar(T52, 1, T53),
+isTrain(T4),
+isTrain(T53).
