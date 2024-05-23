@@ -187,3 +187,16 @@ addCarInPosition([FirstPcar | RestPcars], Pcar, Position, [FirstPcar | NewRestPc
     Position > 0,
     NewPosition is Position - 1,
     addCarInPosition(RestPcars, Pcar, NewPosition, NewRestPcars).
+
+% Req. 12 TDA train - Modificador. Predicado que permite eliminar un carro desde el convoy.
+trainRemoveCar(Train, Position, TrainOut) :-
+    train(Id, Maker, RailType, Speed, Pcars, Train),
+    removeCarInPosition(Pcars, Position, PcarsOut),
+    train(Id, Maker, RailType, Speed, PcarsOut, TrainOut).
+
+% TDA train: Elimina un carro de una lista de carros en una posición dada
+removeCarInPosition([_ | Rest], 0, Rest) :- !.
+removeCarInPosition([FirstPcar | RestPcars], Position, [FirstPcar | NewRestPcars]) :-
+    Position > 0,
+    NewPosition is Position -1,
+    removeCarInPosition(RestPcars, NewPosition, NewRestPcars).

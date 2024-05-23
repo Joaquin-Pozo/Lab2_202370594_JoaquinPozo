@@ -89,4 +89,6 @@ train(1, "CAF", "UIC 60 ASCE", 70, [PC1, PC0, PC3, PC2], T1),
 trainAddCar(T0, PC1, 0, T2),
 trainAddCar(T2, PC2, 1, T3),
 trainAddCar(T3, PC0, 1, T4),
-trainAddCar(T4, PC3, 2, T5).
+trainAddCar(T4, PC3, 2, T5),
+trainRemoveCar(T5, 2, T52),
+trainRemoveCar(T52, 1, T53).
