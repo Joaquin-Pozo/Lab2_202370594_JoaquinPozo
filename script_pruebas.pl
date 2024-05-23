@@ -93,4 +93,7 @@ trainAddCar(T4, PC3, 2, T5),
 trainRemoveCar(T5, 2, T52),
 trainRemoveCar(T52, 1, T53),
 isTrain(T4),
-isTrain(T53).
+isTrain(T53),
+trainCapacity(T1, CapacityT1),
+trainCapacity(T2, CapacityT2),
+trainCapacity(T53, CapacityT53).

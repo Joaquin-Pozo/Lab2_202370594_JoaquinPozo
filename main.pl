@@ -215,3 +215,16 @@ isTrain(Train) :-
     Speed >= 0,
     is_list(Pcars),
     checkTrainStructure(Pcars).
+
+% Req. 14 TDA train - Otros predicados. Predicado que permite determinar la capacidad máxima de pasajeros del tren.
+% Meta Primaria:
+% Meta Secundaria:
+trainCapacity(Train, Capacity) :-
+    train(_, _, _, _, Pcars, Train),
+    trainCapacityRec(Pcars, Capacity).
+
+trainCapacityRec([], 0).
+trainCapacityRec([FirstPcar | RestPcars], Capacity) :-
+    pcar(_, GetCapacity, _, _, FirstPcar),
+    trainCapacityRec(RestPcars, CapacityAux),
+    Capacity is GetCapacity + CapacityAux.
