@@ -244,4 +244,29 @@ subway(Id, Name, [Id, Name]) :-
     integer(Id),
     string(Name).
 
+% Constructor para agregar trenes a subway
+subway(Id, Name, Trains, [Id, Name, Trains]) :-
+    integer(Id),
+    string(Name),
+    is_list(Trains).
 
+% Req. 17 TDA subway - Modificador. Predicado que permite añadir trenes a una red de metro.
+% Meta Primaria:
+% Meta Secundaria:
+subwayAddTrain(Subway, Trains, SubwayOut) :-
+    (	subway(Id, Name, Subway) ->
+    		checkTrainsStructureAndId(Trains, []),
+    		subway(Id, Name, Trains, SubwayOut)
+    ;   subway(Id, Name, ExistingTrains, Subway) ->  
+    		append(ExistingTrains, Trains, NewTrains),
+    		checkTrainsStructureAndId(NewTrains, []),
+        	subway(Id, Name, NewTrains, SubwayOut)
+    ).
+% TDA subway: Funcion que verifica si se repiten IDs en una lista de trains y si los carros que conforman cada train son compatibles
+checkTrainsStructureAndId([], _).
+checkTrainsStructureAndId([FirstTrain | RestTrains], IdList) :-
+    train(Id, _, _, _, Pcars, FirstTrain),
+    not(member(Id, IdList)),
+    NewIdList = [Id | IdList],
+    checkTrainStructure(Pcars),
+    checkTrainsStructureAndId(RestTrains, NewIdList).
