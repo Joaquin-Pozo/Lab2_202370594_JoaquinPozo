@@ -107,4 +107,6 @@ driver(0, "name0", "CAF", D0),
 driver(1, "Oliver Atom", "ALSTOM", D1),
 subway(0, "Metro Santiago", SW0),
 subwayAddTrain(SW0, [T1], SW1),
-subwayAddTrain(SW1, [T6, T7], SW2).
+subwayAddTrain(SW1, [T6, T7], SW2),
+subwayAddLine(SW2, [L1], SW3),
+subwayAddLine(SW3, [L0_3], SW4).

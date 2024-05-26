@@ -270,3 +270,33 @@ checkTrainsStructureAndId([FirstTrain | RestTrains], IdList) :-
     NewIdList = [Id | IdList],
     checkTrainStructure(Pcars),
     checkTrainsStructureAndId(RestTrains, NewIdList).
+
+
+% Constructor para agregar lineas a subway
+subway(Id, Name, Trains, Lines, [Id, Name, Trains, Lines]) :-
+    integer(Id),
+    string(Name),
+    is_list(Trains),
+    is_list(Lines).
+
+% Req. 18 TDA subway - Modificador. Predicado que permite añadir líneas a una red de metro.
+% Meta Primaria:
+% Meta Secundaria:
+subwayAddLine(Subway, Lines, SubwayOut) :-
+    (	subway(Id, Name, Trains, Subway) ->
+    		checkLinesAndId(Lines, []),
+    		subway(Id, Name, Trains, Lines, SubwayOut)
+    ;   subway(Id, Name, Trains, ExistingLines, Subway) ->  
+    		append(ExistingLines, Lines, NewLines),
+        	checkLinesAndId(NewLines, []),
+        	subway(Id, Name, Trains, NewLines, SubwayOut)
+    ).
+
+% TDA subway: Funcion que verifica si las lineas a agregar cumplen con la estructura, sin que se se repitan IDs entre las lineas.
+checkLinesAndId([], _).
+checkLinesAndId([FirstLine | RestLines], IdList) :-
+    isLine(FirstLine),
+    line(Id, _, _, _, FirstLine),
+    not(member(Id, IdList)),
+    NewIdList = [Id | IdList],
+    checkLinesAndId(RestLines, NewIdList).
