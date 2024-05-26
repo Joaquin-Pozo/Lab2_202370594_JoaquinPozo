@@ -98,4 +98,5 @@ trainCapacity(T1, CapacityT1),
 trainCapacity(T2, CapacityT2),
 trainCapacity(T53, CapacityT53),
 driver(0, "name0", "CAF", D0),
-driver(1, "Oliver Atom", "ALSTOM", D1).
+driver(1, "Oliver Atom", "ALSTOM", D1),
+subway(0, "Metro Santiago", SW0).

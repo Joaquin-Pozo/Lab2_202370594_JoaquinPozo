@@ -230,9 +230,18 @@ trainCapacityRec([FirstPcar | RestPcars], Capacity) :-
     Capacity is GetCapacity + CapacityAux.
 
 % Req. 15 TDA driver - Constructor. Predicado que permite crear un conductor cuya habilitación de conducción depende del fabricante de tren (train-maker)
-% Meta Primaria:
-% Meta Secundaria:
+% Meta Primaria: driver/4
+% Meta Secundaria: integer(Id), string(Name), string(TrainMaker).
 driver(Id, Name, TrainMaker, [Id, Name, TrainMaker]) :-
     integer(Id),
     string(Name),
     string(TrainMaker).
+
+% Req. 16 TDA subway - Constructor. Predicado que permite crear una red de metro.
+% Meta Primaria: subway/3
+% Meta Secundaria: integer(Id), string(Nombre).
+subway(Id, Name, [Id, Name]) :-
+    integer(Id),
+    string(Name).
+
+
