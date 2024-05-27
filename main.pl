@@ -300,3 +300,23 @@ checkLinesAndId([FirstLine | RestLines], IdList) :-
     not(member(Id, IdList)),
     NewIdList = [Id | IdList],
     checkLinesAndId(RestLines, NewIdList).
+
+
+% Constructor para agregar drivers a subway
+subway(Id, Name, Trains, Lines, Drivers, [Id, Name, Trains, Lines, Drivers]) :-
+    integer(Id),
+    string(Name),
+    is_list(Trains),
+    is_list(Lines),
+    is_list(Drivers).
+
+% Req. 19 TDA subway - Modificador. Predicado que permite añadir conductores a una red de metro.
+% Meta Primaria:
+% Meta Secundaria:
+subwayAddDriver(Subway, Drivers, SubwayOut) :-
+    (	subway(Id, Name, Trains, Lines, Subway) ->  
+    		subway(Id, Name, Trains, Lines, Drivers, SubwayOut)
+    ;   subway(Id, Name, Trains, Lines, ExistingDrivers, Subway) ->  
+        	append(ExistingDrivers, Drivers, NewDrivers),
+        	subway(Id, Name, Trains, Lines, NewDrivers, SubwayOut)
+    ).
