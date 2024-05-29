@@ -320,3 +320,22 @@ subwayAddDriver(Subway, Drivers, SubwayOut) :-
         	append(ExistingDrivers, Drivers, NewDrivers),
         	subway(Id, Name, Trains, Lines, NewDrivers, SubwayOut)
     ).
+
+% Req. 20 TDA subway - Otras funciones . Función que permite expresar una red de metro en un formato String.
+% Meta Primaria:
+% Meta Secundaria:
+subwayToString(Subway, StringOut) :-
+    flattenSubway(Subway, FlatSubway),
+    with_output_to(atom(Atom), format('~w', [FlatSubway])),
+    atom_string(Atom, String),
+    sub_string(String, 1, _, 1, StringOut).
+
+% TDA subway: Funcion que permite aplanar la lista de listas subway en una sola lista.
+flattenSubway([], []).
+flattenSubway([First | Rest], FlatList) :-
+    (   not(is_list(First))) ->
+            FlatList = [First | RestFlat],
+            flattenSubway(Rest, RestFlat)
+    ;   flattenSubway(First, FirstFlat),
+            flattenSubway(Rest, RestFlat),
+            append(FirstFlat, RestFlat, FlatList).

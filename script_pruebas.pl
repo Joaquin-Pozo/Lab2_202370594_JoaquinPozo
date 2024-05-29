@@ -113,4 +113,8 @@ subwayAddTrain(SW1, [T6, T7], SW2),
 subwayAddLine(SW2, [L1], SW3),
 subwayAddLine(SW3, [L0_3], SW4),
 subwayAddDriver(SW4, [D0] , SW5),
-subwayAddDriver(SW5, [D1, D2, D3], SW6).
+subwayAddDriver(SW5, [D1, D2, D3], SW6),
+subwayToString(SW6, STR1),
+subwayToString(SW5, STR2),
+subwayToString(SW4, STR3),
+subwayToString(SW3, STR4).
