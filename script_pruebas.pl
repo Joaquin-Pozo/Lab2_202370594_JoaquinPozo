@@ -117,4 +117,7 @@ subwayAddDriver(SW5, [D1, D2, D3], SW6),
 subwayToString(SW6, STR1),
 subwayToString(SW5, STR2),
 subwayToString(SW4, STR3),
-subwayToString(SW3, STR4).
+subwayToString(SW3, STR4),
+subwaySetStationStoptime(SW6, "Los Héroes", 90, SW7),
+subwaySetStationStoptime(SW7, "USACH", 120, SW8),
+subwaySetStationStoptime(SW8, "Estación Central", 70, SW9).

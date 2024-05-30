@@ -9,7 +9,6 @@ station(Id, Name, Type, StopTime, [Id, Name, Type, StopTime]) :-
     (integer(StopTime); float(StopTime)),
     StopTime >= 0,
     !.
-
 % Req. 3 TDA section - constructor
 % Meta Primaria: section/5
 % Meta Secundaria: (float(Distance); integer(Distance)),Distance > 0,(float(Cost); integer(Cost)),Cost >= 0,!
@@ -19,7 +18,6 @@ section(Point1, Point2, Distance, Cost, [Point1, Point2, Distance, Cost]) :-
     (float(Cost); integer(Cost)),
     Cost >= 0,
     !.
-
 % Req. 4 TDA line - constructor
 % Meta Primaria: line/5
 % Meta Secundaria: integer(Id),string(Name),string(RailType),is_list(Sections)
@@ -337,5 +335,40 @@ flattenSubway([First | Rest], FlatList) :-
             FlatList = [First | RestFlat],
             flattenSubway(Rest, RestFlat)
     ;   flattenSubway(First, FirstFlat),
-            flattenSubway(Rest, RestFlat),
-            append(FirstFlat, RestFlat, FlatList).
+    	flattenSubway(Rest, RestFlat),
+    	append(FirstFlat, RestFlat, FlatList).
+
+% Req. 21 TDA subway - Modificador. Predicado que permite modificar el tiempo de parada de una estación.
+% Meta Primaria: 
+% Meta Secundaria:
+subwaySetStationStoptime(Subway, StationName, Time, SubwayOut) :-
+    subway(Id, Name, Trains, Lines, Drivers, Subway),
+    searchForLines(Lines, StationName, Time, NewLines),
+    subway(Id, Name, Trains, NewLines, Drivers, SubwayOut).
+
+% TDA subway: Funcion que permite recorrer las lineas del metro y obtener sus secciones
+searchForLines([], _, _, []).
+searchForLines([FirstLine | RestLines], StationName, Time, [NewFirstLine | NewRestLines]) :-
+    line(Id, Name, RailType, Sections, FirstLine),
+    searchForSections(Sections, StationName, Time, NewSections),
+    line(Id, Name, RailType, NewSections, NewFirstLine),
+    searchForLines(RestLines, StationName, Time, NewRestLines).
+
+% TDA subway: Funcion que permite recorrer las secciones de cada linea y obtener sus estaciones
+searchForSections([], _, _, []).
+searchForSections([FirstSection | RestSections], StationName, Time, [NewFirstSection | NewRestSections]) :-
+    section(Station1, Station2, Distance, Cost, FirstSection),
+    (   updateStationStopTime(Station1, StationName, Time, NewStation1) ->
+        	section(NewStation1, Station2, Distance, Cost, NewFirstSection),
+        	searchForSections(RestSections, StationName, Time, NewRestSections)
+    ;   updateStationStopTime(Station2, StationName, Time, NewStation2) ->
+        	section(Station1, NewStation2, Distance, Cost, NewFirstSection),
+    		searchForSections(RestSections, StationName, Time, NewRestSections)
+    ;   NewFirstSection = FirstSection, 
+    	searchForSections(RestSections, StationName, Time, NewRestSections)
+    ).
+
+% TDA subway: Funcion que permite verificar si alguna estacion coincide con StationName, si es asi, actualiza el tiempo de parada
+updateStationStopTime(Station, StationName, Time, NewStation) :-
+    station(Id, StationName, Type, _, Station),
+    station(Id, StationName, Type, Time, NewStation).
