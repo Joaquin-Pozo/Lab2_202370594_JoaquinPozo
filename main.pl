@@ -242,7 +242,7 @@ subway(Id, Name, [Id, Name]) :-
     integer(Id),
     string(Name).
 
-% Constructor para agregar trenes a subway
+% TDA subway: Constructor para agregar trenes a subway
 subway(Id, Name, Trains, [Id, Name, Trains]) :-
     integer(Id),
     string(Name),
@@ -270,7 +270,7 @@ checkTrainsStructureAndId([FirstTrain | RestTrains], IdList) :-
     checkTrainsStructureAndId(RestTrains, NewIdList).
 
 
-% Constructor para agregar lineas a subway
+% TDA subway: Constructor para agregar lineas a subway
 subway(Id, Name, Trains, Lines, [Id, Name, Trains, Lines]) :-
     integer(Id),
     string(Name),
@@ -300,7 +300,7 @@ checkLinesAndId([FirstLine | RestLines], IdList) :-
     checkLinesAndId(RestLines, NewIdList).
 
 
-% Constructor para agregar drivers a subway
+% TDA subway: Constructor para agregar drivers a subway
 subway(Id, Name, Trains, Lines, Drivers, [Id, Name, Trains, Lines, Drivers]) :-
     integer(Id),
     string(Name),
@@ -372,3 +372,45 @@ searchForSections([FirstSection | RestSections], StationName, Time, [NewFirstSec
 updateStationStopTime(Station, StationName, Time, NewStation) :-
     station(Id, StationName, Type, _, Station),
     station(Id, StationName, Type, Time, NewStation).
+
+
+% TDA subway: Constructor para agregar recorridos a subway
+subway(Id, Name, Trains, Lines, Drivers, Routes, [Id, Name, Trains, Lines, Drivers, Routes]) :-
+    integer(Id),
+    string(Name),
+    is_list(Trains),
+    is_list(Lines),
+    is_list(Drivers),
+    is_list(Routes).
+% TDA subway: Constructor para agregar recorridos a subway
+route(TrainId, LineId, [TrainId, LineId]).
+% TDA subway: Constructor para agregar recorridos a subway
+route(TrainId, LineId, DriverId, DepartureTime, DepartureStation, ArrivalStation, [TrainId, LineId, DriverId, DepartureTime, DepartureStation, ArrivalStation]).
+% Req. 22 TDA subway - Modificador. Predicado que permite asignar un tren a una línea.
+% Meta Primaria:
+% Meta Secundaria:
+subwayAssignTrainToLine(Subway, TrainId, LineId, SubwayOut) :-
+    subway(Id, Name, Trains, Lines, Drivers, Subway),
+    checkTrainId(Trains, TrainId),
+    checkLineId(Lines, LineId),
+    route(TrainId, LineId, _, _, _, _, Route),
+    subway(Id, Name, Trains, Lines, Drivers, Route, SubwayOut).
+
+% TDA subway: Funcion que verifica si el Id de un tren se encuentra en Subway
+checkTrainId(Trains, TrainId) :-
+    getTrainsId(Trains, IdList),
+    member(TrainId, IdList).
+% TDA subway: Funcion que aplana todos los Id de una lista de trains
+getTrainsId([], []).
+getTrainsId([FirstTrain | RestTrains], [Id | IdList]) :-
+    train(Id, _, _, _, _, FirstTrain),
+    getTrainsId(RestTrains, IdList).
+% TDA subway: Funcion que verifica si el Id de una linea se encuentra en Subway
+checkLineId(Lines, LineId) :-
+    getLinesId(Lines, IdList),
+    member(LineId, IdList).
+% TDA subway: Funcion que aplana todos los Id de una lista de lines
+getLinesId([], []).
+getLinesId([FirstLine | RestLines], [Id | IdList]) :-
+    line(Id, _, _, _, FirstLine),
+    getLinesId(RestLines, IdList).
