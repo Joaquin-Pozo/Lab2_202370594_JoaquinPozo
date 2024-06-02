@@ -121,4 +121,5 @@ subwayToString(SW3, STR4),
 subwaySetStationStoptime(SW6, "Los Héroes", 90, SW7),
 subwaySetStationStoptime(SW7, "USACH", 120, SW8),
 subwaySetStationStoptime(SW8, "Estación Central", 70, SW9),
-subwayAssignTrainToLine(SW9, 1, 1, SW9_1).
+subwayAssignTrainToLine(SW9, 1, 1, SW9_1),
+subwayAssignDriverToTrain(SW9_1, 2, 1, "10:30:00", "Los Héroes", "San Pablo", SW9_2).

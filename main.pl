@@ -393,7 +393,7 @@ subwayAssignTrainToLine(Subway, TrainId, LineId, SubwayOut) :-
     subway(Id, Name, Trains, Lines, Drivers, Subway),
     checkTrainId(Trains, TrainId),
     checkLineId(Lines, LineId),
-    route(TrainId, LineId, _, _, _, _, Route),
+    route(TrainId, LineId, Route),
     subway(Id, Name, Trains, Lines, Drivers, Route, SubwayOut).
 
 % TDA subway: Funcion que verifica si el Id de un tren se encuentra en Subway
@@ -414,3 +414,16 @@ getLinesId([], []).
 getLinesId([FirstLine | RestLines], [Id | IdList]) :-
     line(Id, _, _, _, FirstLine),
     getLinesId(RestLines, IdList).
+
+% Req. 23 TDA subway - Modificador. Predicado que permite asignar un conductor a un tren en un horario de salida determinado considerando estación de partida y de llegada.
+% Meta Primaria:
+% Meta Secundaria:
+subwayAssignDriverToTrain(Subway, DriverId, TrainId, DepartureTime, DepartureStation, ArrivalStation, SubwayOut) :-
+    subway(Id, Name, Trains, Lines, Drivers, Route, Subway),
+    assignDriverToTrain(Route, DriverId, TrainId, DepartureTime, DepartureStation, ArrivalStation, NewRoute),
+    subway(Id, Name, Trains, Lines, Drivers, NewRoute, SubwayOut).
+
+assignDriverToTrain(Route, DriverId, TrainId, DepartureTime, DepartureStation, ArrivalStation, NewRoute) :-
+    route(TrainId, LineId, Route),
+    route(TrainId, LineId, DriverId, DepartureTime, DepartureStation, ArrivalStation, NewRoute).
+    
