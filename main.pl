@@ -1,23 +1,21 @@
 % Req. 2 TDA station - constructor
 % Meta Primaria: station/5
-% Meta Secundaria: integer(Id),string(Name),string(Type),(Type == "r"; Type == "m"; Type == "c"; Type == "t"),integer(StopTime),StopTime >= 0,!.
+% Meta Secundaria: integer(Id),string(Name),string(Type),(Type == "r"; Type == "m"; Type == "c"; Type == "t"),integer(StopTime),StopTime >= 0.
 station(Id, Name, Type, StopTime, [Id, Name, Type, StopTime]) :-
     integer(Id),
     string(Name),
     string(Type),
     (Type == "r"; Type == "m"; Type == "c"; Type == "t"),
     (integer(StopTime); float(StopTime)),
-    StopTime >= 0,
-    !.
+    StopTime >= 0.
 % Req. 3 TDA section - constructor
 % Meta Primaria: section/5
-% Meta Secundaria: (float(Distance); integer(Distance)),Distance > 0,(float(Cost); integer(Cost)),Cost >= 0,!
+% Meta Secundaria: (float(Distance); integer(Distance)),Distance > 0,(float(Cost); integer(Cost)),Cost >= 0.
 section(Point1, Point2, Distance, Cost, [Point1, Point2, Distance, Cost]) :-
     (float(Distance); integer(Distance)),
     Distance > 0,
     (float(Cost); integer(Cost)),
-    Cost >= 0,
-    !.
+    Cost >= 0.
 % Req. 4 TDA line - constructor
 % Meta Primaria: line/5
 % Meta Secundaria: integer(Id),string(Name),string(RailType),is_list(Sections)
@@ -38,14 +36,13 @@ lineLength(Line, Length, Distance, Cost) :-
 lineLengthRec([], 0, 0, 0).
 % TDA line- Otros predicados: caso recursivo para función recursiva
 % Meta Primaria: lineLength/4
-% Meta Secundaria: section/5, lingeLengthRec/4, Distance is GetDistanceAux + GetDistance,Cost is GetCostAux + GetCost,Length is GetLengthAux + 1
-lineLengthRec([Section | Sections], Length, Distance, Cost) :-
-    section(_, _, GetDistance, GetCost, Section),
-    lineLengthRec(Sections, GetLengthAux, GetDistanceAux, GetCostAux),
-    Distance is GetDistanceAux + GetDistance,
-    Cost is GetCostAux + GetCost,
-    Length is GetLengthAux + 1.
-
+% Meta Secundaria: section/5, lingeLengthRec/4, TotalDistance is DistanceAcc + Distance, TotalCost is CostAcc + Cost, TotalLength is LengthAcc + 1.
+lineLengthRec([Section | Sections], TotalLength, TotalDistance, TotalCost) :-
+    section(_, _, Distance, Cost, Section),
+    lineLengthRec(Sections, LengthAcc, DistanceAcc, CostAcc),
+    TotalDistance is DistanceAcc + Distance,
+    TotalCost is CostAcc + Cost,
+    TotalLength is LengthAcc + 1.
 % Req. 6 TDA line - otras funciones
 % Meta Primaria: lineSectionLength/6
 % Meta Secundaria: line/5, lineSectionLengthRec/7
@@ -98,44 +95,40 @@ lineAddSection(Line, Section, LineOut) :-
     not(member(Section, GetLineSections)),
     append(GetLineSections, [Section], LineSectionsOut),
     line(GetLineId, GetLineName, GetLineRailType, LineSectionsOut, LineOut).
-
 % Req. 8 TDA Línea - pertenencia. Predicado que permite determinar si un elemento cumple con las 
 % restricciones señaladas en apartados anteriores en relación a las estaciones y tramos para poder conformar una línea.
 % Meta Primaria:
 % Meta Secundaria:
 isLine(Line) :-
-    line(_, _, _, GetLineSections, Line),
-    (GetLineSections = [] ->  false;  
-    (verifyIdName(GetLineSections, [], []), verifySections(GetLineSections))),
-    !.
-
-% Caso base: no hay más secciones que verificar
-verifyIdName([], _, _).
-
-% Caso recursivo: verifica cada sección en la lista de secciones
-verifyIdName([FirstSection | RestSections], IdList, NameList) :-
-    section(GetPoint1, _, _, _, FirstSection),
-    station(GetIdPoint1, GetNamePoint1, _, _, GetPoint1),
-    checkStationIdName(GetIdPoint1, GetNamePoint1, IdList, NameList, UpdatedIdList, UpdatedNameList),
-    verifyIdName(RestSections, UpdatedIdList, UpdatedNameList).
-
-% TDA line: Verifica y actualiza la lista de IDs y nombres
-checkStationIdName(Id, Name, IdList, NameList, UpdatedIdList, UpdatedNameList) :-
-    % Verifica si el ID y el nombre ya estan en las listas
-    (	not(member(Id, IdList)) ->
-    		UpdatedIdList = [Id | IdList]
-    	;	fail)
-    ;	(not(member(Name, NameList)) ->
-        	UpdatedNameList = [Name | NameList]
-     	;   fail). 
+    line(_, _, _, Sections, Line),
+    Sections \= [],
+    checkIdAndName(Sections), 
+    checkSectionsConsistency(Sections).
+% TDA Line: Funcion que verifica autenticidad de nombres y ids en una linea de metro
+checkIdAndName(Sections) :-
+    flattenStationNamesAndIds(Sections, NameList, IdList),
+    notDuplicateds(IdList),
+    notDuplicateds(NameList).
+% TDA Line: Caso Base - Funcion que obtiene una lista con los nombres e ids de las estaciones (omite repetidos)
+flattenStationNamesAndIds([LastSection], [Name], [Id]) :-
+    section(_, Station, _, _, LastSection),
+    station(Id, Name, _, _, Station).
+% TDA Line: Caso Recursivo - Funcion que obtiene una lista con los nombres e ids de las estaciones (omite repetidos)
+flattenStationNamesAndIds([Section | RestSections], [Name | RestNameList], [Id | RestIdList]) :-
+    section(Station, _, _, _, Section),
+    station(Id, Name, _, _, Station),
+    flattenStationNamesAndIds(RestSections, RestNameList, RestIdList).
+% TDA Line: Funcion que verifica que no existan duplicados en una lista
+notDuplicateds([]).
+notDuplicateds([First | Rest]) :-
+    not(member(First, Rest)),
+    notDuplicateds(Rest).
 % TDA line: Verifica si de una estación se pueda ir a todas las demás estaciones
-verifySections([]).
-verifySections([_]). % Una sola sección es válida por defecto
-verifySections([FirstSection, SecondSection | RestSections]) :-
+checkSectionsConsistency([_]).
+checkSectionsConsistency([FirstSection, SecondSection | RestSections]) :-
     section(_, Station, _, _, FirstSection),
     section(Station, _, _, _, SecondSection),
-    verifySections([SecondSection | RestSections]).
-
+    checkSectionsConsistency([SecondSection | RestSections]).
 % Req. 9 TDA pcar - Constructor. Permite crear los carros de pasajeros que conforman un convoy. Los carros pueden ser de tipo terminal (tr) o central (ct).
 % Meta Primaria: pcar/5
 % Meta Secundaria: integer(Id),integer(Capacity),Capacity >= 0,string(Model),string(Type).
@@ -145,7 +138,6 @@ pcar(Id, Capacity, Model, Type, [Id, Capacity, Model, Type]) :-
     Capacity >= 0,
     string(Model),
     string(Type).
-
 % Req. 10 TDA train - Constructor. Predicado que permite crear un tren o convoy.
 % Meta Primaria: train/6
 % Meta Secundaria:  integer(Id),string(Maker),string(RailType),integer(Speed),Speed >= 0,is_list(Pcars),(Pcars = [] ->  true; checkTrainStructure(Pcars)).
@@ -157,7 +149,6 @@ train(Id, Maker, RailType, Speed, Pcars, [Id, Maker, RailType, Speed, Pcars]) :-
     Speed >= 0,
     is_list(Pcars),
     ((Pcars = []; Pcars = [_]) ->  true; checkTrainStructure(Pcars)).
-
 % TDA train: Verifica si el primer y ultimo carro son terminales, y si tienen modelos compatibles
 checkTrainStructure([FirstPcar | RestPcars]) :-
     pcar(_, _, ModelPcar, TypePcar, FirstPcar),
@@ -170,7 +161,6 @@ checkMiddlePcars([FirstPcar | RestPcars], LastPcar, ModelPcar) :-
     pcar(_, _, ModelPcar, Type, FirstPcar),
     Type = "ct",
     checkMiddlePcars(RestPcars, LastPcar, ModelPcar).
-
 % Req. 11 TDA train - Modificador. Función que permite añadir carros a un tren en una posición dada.
 % Meta Primaria:
 % Meta Secundaria:
@@ -178,14 +168,12 @@ trainAddCar(Train, Pcar, Position, TrainOut) :-
     train(Id, Maker, RailType, Speed, Pcars, Train),
     addCarInPosition(Pcars, Pcar, Position, PcarsOut),
     train(Id, Maker, RailType, Speed, PcarsOut, TrainOut).
-
 % TDA train: Añade un carro a una lista de carros en una posición dada
 addCarInPosition(Pcars, Pcar, 0, [Pcar | Pcars]) :- !.
 addCarInPosition([FirstPcar | RestPcars], Pcar, Position, [FirstPcar | NewRestPcars]) :-
     Position > 0,
     NewPosition is Position - 1,
     addCarInPosition(RestPcars, Pcar, NewPosition, NewRestPcars).
-
 % Req. 12 TDA train - Modificador. Predicado que permite eliminar un carro desde el convoy.
 % Meta Primaria:
 % Meta Secundaria:
@@ -193,14 +181,12 @@ trainRemoveCar(Train, Position, TrainOut) :-
     train(Id, Maker, RailType, Speed, Pcars, Train),
     removeCarInPosition(Pcars, Position, PcarsOut),
     train(Id, Maker, RailType, Speed, PcarsOut, TrainOut).
-
 % TDA train: Elimina un carro de una lista de carros en una posición dada
 removeCarInPosition([_ | Rest], 0, Rest) :- !.
 removeCarInPosition([FirstPcar | RestPcars], Position, [FirstPcar | NewRestPcars]) :-
     Position > 0,
     NewPosition is Position -1,
     removeCarInPosition(RestPcars, NewPosition, NewRestPcars).
-    
 % Req. 13 TDA train - Pertenencia. Predicado que permite determinar si un elemento es un tren válido
 % Meta Primaria
 % Meta Secundaria
@@ -213,7 +199,6 @@ isTrain(Train) :-
     Speed >= 0,
     is_list(Pcars),
     checkTrainStructure(Pcars).
-
 % Req. 14 TDA train - Otros predicados. Predicado que permite determinar la capacidad máxima de pasajeros del tren.
 % Meta Primaria:
 % Meta Secundaria:
@@ -226,7 +211,6 @@ trainCapacityRec([FirstPcar | RestPcars], Capacity) :-
     pcar(_, GetCapacity, _, _, FirstPcar),
     trainCapacityRec(RestPcars, CapacityAux),
     Capacity is GetCapacity + CapacityAux.
-
 % Req. 15 TDA driver - Constructor. Predicado que permite crear un conductor cuya habilitación de conducción depende del fabricante de tren (train-maker)
 % Meta Primaria: driver/4
 % Meta Secundaria: integer(Id), string(Name), string(TrainMaker).
@@ -234,14 +218,12 @@ driver(Id, Name, TrainMaker, [Id, Name, TrainMaker]) :-
     integer(Id),
     string(Name),
     string(TrainMaker).
-
 % Req. 16 TDA subway - Constructor. Predicado que permite crear una red de metro.
 % Meta Primaria: subway/3
 % Meta Secundaria: integer(Id), string(Nombre).
 subway(Id, Name, [Id, Name]) :-
     integer(Id),
     string(Name).
-
 % TDA subway: Constructor para agregar trenes a subway
 subway(Id, Name, Trains, [Id, Name, Trains]) :-
     integer(Id),
@@ -268,38 +250,40 @@ checkTrainsStructureAndId([FirstTrain | RestTrains], IdList) :-
     NewIdList = [Id | IdList],
     checkTrainStructure(Pcars),
     checkTrainsStructureAndId(RestTrains, NewIdList).
-
-
 % TDA subway: Constructor para agregar lineas a subway
 subway(Id, Name, Trains, Lines, [Id, Name, Trains, Lines]) :-
     integer(Id),
     string(Name),
     is_list(Trains),
     is_list(Lines).
-
 % Req. 18 TDA subway - Modificador. Predicado que permite añadir líneas a una red de metro.
 % Meta Primaria:
 % Meta Secundaria:
 subwayAddLine(Subway, Lines, SubwayOut) :-
     (	subway(Id, Name, Trains, Subway) ->
-    		checkLinesAndId(Lines, []),
+    		checkLines(Lines),
     		subway(Id, Name, Trains, Lines, SubwayOut)
     ;   subway(Id, Name, Trains, ExistingLines, Subway) ->  
     		append(ExistingLines, Lines, NewLines),
-        	checkLinesAndId(NewLines, []),
+        	checkLines(NewLines),
         	subway(Id, Name, Trains, NewLines, SubwayOut)
     ).
-
 % TDA subway: Funcion que verifica si las lineas a agregar cumplen con la estructura, sin que se se repitan IDs entre las lineas.
-checkLinesAndId([], _).
-checkLinesAndId([FirstLine | RestLines], IdList) :-
+
+checkLines(Lines) :-
+    getLineIdsStationNamesAndId(Lines, LineIds, NameList, IdList),
+    flattenList(NameList, NewNameList),
+    flattenList(IdList, NewIdList),
+    notDuplicateds(LineIds),
+    notDuplicateds(NewNameList),
+    notDuplicateds(NewIdList).
+% TDA subway: Funcion que obtiene todos los ID de las lineas de subway
+getLineIdsStationNamesAndId([], [], [], []).
+getLineIdsStationNamesAndId([FirstLine | RestLines], [Id | RestIds], [NameList | RestNameList], [IdList | RestIdList]) :-
     isLine(FirstLine),
-    line(Id, _, _, _, FirstLine),
-    not(member(Id, IdList)),
-    NewIdList = [Id | IdList],
-    checkLinesAndId(RestLines, NewIdList).
-
-
+    line(Id, _, _, Sections, FirstLine),
+    flattenStationNamesAndIds(Sections, NameList, IdList),
+    getLineIdsStationNamesAndId(RestLines, RestIds, RestNameList, RestIdList).
 % TDA subway: Constructor para agregar drivers a subway
 subway(Id, Name, Trains, Lines, Drivers, [Id, Name, Trains, Lines, Drivers]) :-
     integer(Id),
@@ -307,7 +291,6 @@ subway(Id, Name, Trains, Lines, Drivers, [Id, Name, Trains, Lines, Drivers]) :-
     is_list(Trains),
     is_list(Lines),
     is_list(Drivers).
-
 % Req. 19 TDA subway - Modificador. Predicado que permite añadir conductores a una red de metro.
 % Meta Primaria:
 % Meta Secundaria:
@@ -318,24 +301,23 @@ subwayAddDriver(Subway, Drivers, SubwayOut) :-
         	append(ExistingDrivers, Drivers, NewDrivers),
         	subway(Id, Name, Trains, Lines, NewDrivers, SubwayOut)
     ).
-
 % Req. 20 TDA subway - Otras funciones . Función que permite expresar una red de metro en un formato String.
 % Meta Primaria:
 % Meta Secundaria:
 subwayToString(Subway, StringOut) :-
-    flattenSubway(Subway, FlatSubway),
+    flattenList(Subway, FlatSubway),
     with_output_to(atom(Atom), format('~w', [FlatSubway])),
     atom_string(Atom, String),
     sub_string(String, 1, _, 1, StringOut).
 
 % TDA subway: Funcion que permite aplanar la lista de listas subway en una sola lista.
-flattenSubway([], []).
-flattenSubway([First | Rest], FlatList) :-
+flattenList([], []).
+flattenList([First | Rest], FlatList) :-
     (   not(is_list(First))) ->
             FlatList = [First | RestFlat],
-            flattenSubway(Rest, RestFlat)
-    ;   flattenSubway(First, FirstFlat),
-    	flattenSubway(Rest, RestFlat),
+            flattenList(Rest, RestFlat)
+    ;   flattenList(First, FirstFlat),
+    	flattenList(Rest, RestFlat),
     	append(FirstFlat, RestFlat, FlatList).
 
 % Req. 21 TDA subway - Modificador. Predicado que permite modificar el tiempo de parada de una estación.
@@ -372,7 +354,6 @@ searchForSections([FirstSection | RestSections], StationName, Time, [NewFirstSec
 updateStationStopTime(Station, StationName, Time, NewStation) :-
     station(Id, StationName, Type, _, Station),
     station(Id, StationName, Type, Time, NewStation).
-
 
 % TDA subway: Constructor para agregar recorridos a subway
 subway(Id, Name, Trains, Lines, Drivers, Routes, [Id, Name, Trains, Lines, Drivers, Routes]) :-
@@ -426,4 +407,12 @@ subwayAssignDriverToTrain(Subway, DriverId, TrainId, DepartureTime, DepartureSta
 assignDriverToTrain(Route, DriverId, TrainId, DepartureTime, DepartureStation, ArrivalStation, NewRoute) :-
     route(TrainId, LineId, Route),
     route(TrainId, LineId, DriverId, DepartureTime, DepartureStation, ArrivalStation, NewRoute).
+
+% Req. 24 TDA subway - Otros predicados . Predicado que permite determinar dónde está un tren a partir de una hora indicada del día.
+% Meta Primaria:
+% Meta Secundaria:
+whereIsTrain(Subway, TrainId, Time, Station) :-
+    subway(_, _, _, Lines, _, Route, Subway),
+    route(_, LineId, _, DepartureTime, DepartureStation, ArrivalStation, Route),
+    calculateTimeDiff(DepartureTime, Time, Minutes)
     
