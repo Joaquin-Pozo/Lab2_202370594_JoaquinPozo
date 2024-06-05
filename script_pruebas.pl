@@ -107,4 +107,5 @@ subwaySetStationStoptime(SW6, "Los Héroes", 90, SW7),
 subwaySetStationStoptime(SW7, "USACH", 120, SW8),
 subwaySetStationStoptime(SW8, "Estación Central", 70, SW9),
 subwayAssignTrainToLine(SW9, 1, 6, SW9_1),
-subwayAssignDriverToTrain(SW9_1, 2, 1, "10:30:00", "Cerrillos", "Los Leones", SW9_2).
+subwayAssignDriverToTrain(SW9_1, 2, 1, "10:30:00", "Cerrillos", "Los Leones", SW9_2),
+whereIsTrain(SW9_2, 1, "15:30:00", Station).

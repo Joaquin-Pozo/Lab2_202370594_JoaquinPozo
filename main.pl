@@ -408,11 +408,70 @@ assignDriverToTrain(Route, DriverId, TrainId, DepartureTime, DepartureStation, A
     route(TrainId, LineId, Route),
     route(TrainId, LineId, DriverId, DepartureTime, DepartureStation, ArrivalStation, NewRoute).
 
-% Req. 24 TDA subway - Otros predicados . Predicado que permite determinar dónde está un tren a partir de una hora indicada del día.
+% Req. 24 TDA subway - Otros predicados. Predicado que permite determinar dónde está un tren a partir de una hora indicada del día.
 % Meta Primaria:
 % Meta Secundaria:
 whereIsTrain(Subway, TrainId, Time, Station) :-
-    subway(_, _, _, Lines, _, Route, Subway),
-    route(_, LineId, _, DepartureTime, DepartureStation, ArrivalStation, Route),
-    calculateTimeDiff(DepartureTime, Time, Minutes)
-    
+    subway(_, _, Trains, Lines, _, Route, Subway),
+    route(TrainId, LineId, _, DepartureTime, DepartureStation, ArrivalStation, Route),
+    calculateTimeDiff(DepartureTime, Time, Minutes),
+    getTrainSpeed(Trains, TrainId, Speed),
+    getLineSections(Lines, LineId, Sections),
+    calculateClosestStation(Sections, Minutes, Speed, Station, DepartureStation, ArrivalStation, 0).
+
+% Calcula la diferencia de tiempo en minutos
+calculateTimeDiff(DepartureTime, Time, Minutes) :-
+    transformToMinutes(DepartureTime, NewDepartureTime),
+    transformToMinutes(Time, NewTime),
+    Minutes is NewTime - NewDepartureTime.
+
+% Convierte una cadena de tiempo en minutos
+transformToMinutes(Time, TimeOut) :-
+    split_string(Time, ":", "", TimeList),
+    TimeList = [HourStr, MinuteStr, SecondStr],
+    number_string(Hours, HourStr),
+    number_string(Minutes, MinuteStr),
+    number_string(Seconds, SecondStr),
+    TotalMinutes is Hours * 60 + Minutes + Seconds // 60,
+    TimeOut = TotalMinutes.
+
+% Obtiene la velocidad de un tren dado su ID
+getTrainSpeed([], _, _) :- fail.
+getTrainSpeed([FirstTrain | _], TrainId, Speed) :-
+    train(TrainId, _, _, Speed, _, FirstTrain).
+getTrainSpeed([_ | RestTrains], TrainId, Speed) :-
+    getTrainSpeed(RestTrains, TrainId, Speed).
+
+% Obtiene las secciones de una línea dado su ID
+getLineSections([], _, _) :- fail.
+getLineSections([FirstLine | _], LineId, Sections) :-
+    line(LineId, _, _, Sections, FirstLine).
+getLineSections([_ | RestLines], LineId, Sections) :-
+    getLineSections(RestLines, LineId, Sections).
+
+% Calcula la estación más cercana al tren según el tiempo transcurrido
+calculateClosestStation([], _, _, _, _, _, _) :- fail.
+calculateClosestStation([FirstSection | RestSections], Minutes, Speed, Station, DepartureStation, ArrivalStation, Flag) :-
+    section(Station1, _, _, _, FirstSection),
+    station(_, Station1Name, _, _, Station1),
+    (   Station1Name = DepartureStation ->
+        	startCalculating([FirstSection | RestSections], Minutes, 0, Speed, Station, ArrivalStation, Flag)
+    ;   calculateClosestStation(RestSections, Minutes, Speed, Station, DepartureStation, ArrivalStation, Flag)
+    ).
+
+% Calcula la estación actual del tren basándose en el tiempo transcurrido
+startCalculating([], _, _, _, _, _, _) :- fail.
+startCalculating([FirstSection | RestSections], Minutes, MinutesAcc, Speed, Station, ArrivalStation, Flag) :-
+    section(Station1, Station2, Distance, _, FirstSection),
+    station(_, Station1Name, _, StopTime1, Station1),
+    station(_, Station2Name, _, _, Station2),
+    NewMinutesAcc is MinutesAcc + Distance / Speed + StopTime1,
+    (   NewMinutesAcc >= Minutes, Flag = 0 ->
+        Station = Station1Name
+    ;   Station1Name = ArrivalStation, Flag = 0 ->
+        Station = Station1Name
+    ;   Station2Name = ArrivalStation, Flag = 0 ->
+        Station = Station2Name
+    ;   startCalculating(RestSections, Minutes, NewMinutesAcc, Speed, Station, ArrivalStation, Flag)
+    ).
+ 
