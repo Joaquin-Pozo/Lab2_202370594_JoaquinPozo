@@ -417,7 +417,7 @@ whereIsTrain(Subway, TrainId, Time, Station) :-
     calculateTimeDiff(DepartureTime, Time, Minutes),
     getTrainSpeed(Trains, TrainId, Speed),
     getLineSections(Lines, LineId, Sections),
-    calculateClosestStation(Sections, Minutes, Speed, Station, DepartureStation, ArrivalStation, 0).
+    calculateClosestStation(Sections, Minutes, Speed, Station, DepartureStation, ArrivalStation).
 
 % Calcula la diferencia de tiempo en minutos
 calculateTimeDiff(DepartureTime, Time, Minutes) :-
@@ -450,28 +450,64 @@ getLineSections([_ | RestLines], LineId, Sections) :-
     getLineSections(RestLines, LineId, Sections).
 
 % Calcula la estación más cercana al tren según el tiempo transcurrido
-calculateClosestStation([], _, _, _, _, _, _) :- fail.
-calculateClosestStation([FirstSection | RestSections], Minutes, Speed, Station, DepartureStation, ArrivalStation, Flag) :-
+calculateClosestStation([], _, _, _, _, _) :- fail.
+calculateClosestStation([FirstSection | RestSections], Minutes, Speed, Station, DepartureStation, ArrivalStation) :-
     section(Station1, _, _, _, FirstSection),
     station(_, Station1Name, _, _, Station1),
     (   Station1Name = DepartureStation ->
-        	startCalculating([FirstSection | RestSections], Minutes, 0, Speed, Station, ArrivalStation, Flag)
-    ;   calculateClosestStation(RestSections, Minutes, Speed, Station, DepartureStation, ArrivalStation, Flag)
+        	startCalculating([FirstSection | RestSections], Minutes, 0, Speed, Station, ArrivalStation)
+    ;   calculateClosestStation(RestSections, Minutes, Speed, Station, DepartureStation, ArrivalStation)
     ).
 
 % Calcula la estación actual del tren basándose en el tiempo transcurrido
-startCalculating([], _, _, _, _, _, _) :- fail.
-startCalculating([FirstSection | RestSections], Minutes, MinutesAcc, Speed, Station, ArrivalStation, Flag) :-
+startCalculating([], _, _, _, _, _) :- fail.
+startCalculating([FirstSection | RestSections], Minutes, MinutesAcc, Speed, Station, ArrivalStation) :-
     section(Station1, Station2, Distance, _, FirstSection),
     station(_, Station1Name, _, StopTime1, Station1),
     station(_, Station2Name, _, _, Station2),
     NewMinutesAcc is MinutesAcc + Distance / Speed + StopTime1,
-    (   NewMinutesAcc >= Minutes, Flag = 0 ->
-        Station = Station1Name
-    ;   Station1Name = ArrivalStation, Flag = 0 ->
-        Station = Station1Name
-    ;   Station2Name = ArrivalStation, Flag = 0 ->
-        Station = Station2Name
-    ;   startCalculating(RestSections, Minutes, NewMinutesAcc, Speed, Station, ArrivalStation, Flag)
+    (   NewMinutesAcc >= Minutes ->
+        	Station = Station1Name
+    ;   Station1Name = ArrivalStation ->
+        	Station = Station1Name
+    ;   Station2Name = ArrivalStation ->
+        	Station = Station2Name
+    ;   startCalculating(RestSections, Minutes, NewMinutesAcc, Speed, Station, ArrivalStation)
     ).
- 
+
+% Req. 25 TDA subway - Otros predicados. Predicado que permite ir armando el recorrido del tren a partir de una hora especificada.
+% Meta Primaria:
+% Meta Secundaria:
+subwayTrainPath(Subway, TrainId, Time, Stations) :-
+    subway(_, _, Trains, Lines, _, Routes, Subway),
+    route(TrainId, LineId, _, DepartureTime, DepartureStation, ArrivalStation, Routes),
+    calculateTimeDiff(DepartureTime, Time, Minutes),
+    Minutes >= 0,
+    getTrainSpeed(Trains, TrainId, Speed),
+    getLineSections(Lines, LineId, Sections),
+    calculateNextStations(Sections, Minutes, 0, Speed, Stations, DepartureStation, ArrivalStation).
+
+% Calcula las estaciones futuras que recorrerá el tren
+calculateNextStations([], _, _, _, [], _, _).
+calculateNextStations([FirstSection | RestSections], Minutes, MinutesAcc, Speed, Stations, DepartureStation, ArrivalStation) :-
+    section(Station1, _, Distance, _, FirstSection),
+    station(_, _, _, StopTime1, Station1),
+    NewMinutesAcc is MinutesAcc + Distance / Speed + StopTime1,
+    (   NewMinutesAcc >= Minutes ->
+        	startCalculatingNextStations([FirstSection | RestSections], [], ArrivalStation, Stations)
+    ;   calculateNextStations(RestSections, Minutes, NewMinutesAcc, Speed, Stations, DepartureStation, ArrivalStation)
+    ).
+
+% Comienza a calcular las estaciones futuras desde la sección donde el tiempo acumulado es suficiente
+startCalculatingNextStations([], Stations, _, Stations).
+startCalculatingNextStations([FirstSection | RestSections], AccumulatedStations, ArrivalStation, Stations) :-
+    section(Station1, Station2, _, _, FirstSection),
+    station(_, Station1Name, _, _, Station1),
+    station(_, Station2Name, _, _, Station2),
+    (   ArrivalStation = Station1Name ->
+        	append(AccumulatedStations, [Station1Name], Stations)
+    ;   ArrivalStation = Station2Name ->
+        	append(AccumulatedStations, [Station1Name, Station2Name], Stations)
+    ;   append(AccumulatedStations, [Station1Name], NewStations),
+        	startCalculatingNextStations(RestSections, NewStations, ArrivalStation, Stations)
+    ).
